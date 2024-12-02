@@ -20,7 +20,9 @@ mongoose.connect(process.env.MONGO_URI)
 const newsSchema = new mongoose.Schema({
   heading: { type: String, required: true },
   mainNews: { type: String, required: true },
-  image: { type: String, required: true }
+  image: { type: String, required: true },
+  author: { type: String, required: true }, // Added author field
+  date: { type: Date, default: Date.now }   // Added date field with default value
 });
 
 // Create News Model
@@ -38,16 +40,16 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// Add news (for testing)
+// Add news
 app.post('/api/news', async (req, res) => {
-  const { heading, mainNews, image } = req.body;
+  const { heading, mainNews, image, author } = req.body;
 
-  if (!heading || !mainNews || !image) {
+  if (!heading || !mainNews || !image || !author) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const newNews = new News({ heading, mainNews, image });
+    const newNews = new News({ heading, mainNews, image, author });
     await newNews.save();
     res.status(201).json(newNews);
   } catch (error) {
