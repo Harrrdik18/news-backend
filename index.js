@@ -22,7 +22,9 @@ const newsSchema = new mongoose.Schema({
   mainNews: { type: String, required: true },
   image: { type: String, required: true },
   author: { type: String, required: true }, // Added author field
-  date: { type: Date, default: Date.now }   // Added date field with default value
+  date: { type: Date, default: Date.now },
+  location:{type:String },
+
 });
 
 // Create News Model
@@ -42,14 +44,17 @@ app.get('/api/news', async (req, res) => {
 
 // Add news
 app.post('/api/news', async (req, res) => {
-  const { heading, mainNews, image, author } = req.body;
+  const requiredFields = ["heading", "mainNews", "image", "author", "location"]; // Add new keys here
+  const missingFields = requiredFields.filter(field => !req.body[field]);
 
-  if (!heading || !mainNews || !image || !author) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (missingFields.length > 0) {
+    return res.status(400).json({ 
+      message: `Missing required fields: ${missingFields.join(", ")}` 
+    });
   }
 
   try {
-    const newNews = new News({ heading, mainNews, image, author });
+    const newNews = new News(req.body); // Automatically maps keys from req.body
     await newNews.save();
     res.status(201).json(newNews);
   } catch (error) {
